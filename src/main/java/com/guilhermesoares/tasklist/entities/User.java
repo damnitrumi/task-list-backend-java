@@ -2,6 +2,7 @@ package com.guilhermesoares.tasklist.entities;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -78,13 +79,13 @@ public class User implements Serializable, UserDetails{
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		// TODO Auto-generated method stub
-		return null;
+		return List.of(() -> "read");
 	}
 
 	@Override
 	public String getUsername() {
 		// TODO Auto-generated method stub
-		return null;
+		return getLogin();
 	}
 
 	@Override
