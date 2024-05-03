@@ -16,7 +16,7 @@ public class Instantiation implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 		
-		User u1 = new User(null, "username", "$2y$12$LGG4zKbQPH5WVcv9Guxa5uYxYSG5Reb39cIRVa0vT1PYJ7gQ1TQK6");
+		User u1 = new User(null, "username", "$2a$10$tGKD4d9gFZvplwwWeOdESuy4KzzGAgHc23QRgxHaGJrvHsjtnzN.C");
 		userRepository.save(u1);
 	}
 
