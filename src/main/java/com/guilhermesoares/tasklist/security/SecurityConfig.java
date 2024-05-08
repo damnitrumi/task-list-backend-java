@@ -3,6 +3,8 @@ package com.guilhermesoares.tasklist.security;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +20,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.nimbusds.jose.jwk.JWKSet;
@@ -27,6 +30,10 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+	
+	@Autowired
+    @Qualifier("AuthEntryPoint")
+    AuthenticationEntryPoint authEntryPoint;
 
 	@Value("${jwt.public.key}")
 	private RSAPublicKey key;
@@ -40,7 +47,8 @@ public class SecurityConfig {
 		httpSecurity.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth.requestMatchers("/login").permitAll().anyRequest().authenticated())
-				.oauth2ResourceServer(conf -> conf.jwt(Customizer.withDefaults()));
+				.oauth2ResourceServer(conf -> conf.jwt(Customizer.withDefaults()))
+				.exceptionHandling(handling -> handling.authenticationEntryPoint(authEntryPoint));
 
 		return httpSecurity.build();
 	}
