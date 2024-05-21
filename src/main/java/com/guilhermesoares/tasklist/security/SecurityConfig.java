@@ -46,6 +46,9 @@ public class SecurityConfig {
 
 		httpSecurity.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				//As duas linhas abaixo são para funcionar o H2 Console com o Spring Security
+				.headers(header -> header.frameOptions(frame -> frame.disable()))
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/h2-console/**").permitAll())
 				.authorizeHttpRequests(auth -> auth.requestMatchers("/login").permitAll().anyRequest().authenticated())
 				.oauth2ResourceServer(conf -> conf.jwt(Customizer.withDefaults()))
 				.exceptionHandling(handling -> handling.authenticationEntryPoint(authEntryPoint));
