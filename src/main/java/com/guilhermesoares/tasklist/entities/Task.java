@@ -2,12 +2,26 @@ package com.guilhermesoares.tasklist.entities;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
+import com.guilhermesoares.tasklist.entities.enums.TaskPriority;
 import com.guilhermesoares.tasklist.entities.enums.TaskStatus;
 
-public class Task implements Serializable{
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "tb_task")
+public class Task implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String name;
 	private String description;
@@ -16,19 +30,23 @@ public class Task implements Serializable{
 	private Integer taskStatus;
 	private Integer taskPriority;
 	
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User taskOwner;
+
 	public Task() {
 	}
 
-	public Task(Long id, String name, String description, ZonedDateTime createdAt, ZonedDateTime completedAt,
-			Integer taskStatus, Integer taskPriority) {
+	public Task(Long id, String name, String description, TaskPriority taskPriority, User taskOwner) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.createdAt = createdAt;
-		this.completedAt = completedAt;
-		this.taskStatus = taskStatus;
-		this.taskPriority = taskPriority;
+		this.createdAt = ZonedDateTime.now();
+		this.completedAt = null;
+		this.taskStatus = TaskStatus.PENDING.getCode();
+		this.taskPriority = taskPriority.getCode();
+		this.taskOwner = taskOwner;
 	}
 
 	public Long getId() {
@@ -76,20 +94,53 @@ public class Task implements Serializable{
 	}
 
 	public void setTaskStatus(TaskStatus taskStatus) {
-		if(taskStatus != null) {
+		if (taskStatus != null) {
 			this.taskStatus = taskStatus.getCode();
 		}
 	}
 
-	public Integer getTaskPriority() {
-		return taskPriority;
+	public TaskPriority getTaskPriority() {
+		return TaskPriority.valueOf(taskPriority);
 	}
 
-	public void setTaskPriority(Integer taskPriority) {
-		this.taskPriority = taskPriority;
+	public void setTaskPriority(TaskPriority taskPriority) {
+		if (taskPriority != null) {
+			this.taskPriority = taskPriority.getCode();
+		}
 	}
 	
+	public User getTaskOwner() {
+		return taskOwner;
+	}
+
+	public void setTaskOwner(User taskOwner) {
+		this.taskOwner = taskOwner;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Task other = (Task) obj;
+		return Objects.equals(id, other.id);
+	}
 	
+	public void uncompleteTask() {
+		completedAt = null;
+	}
 	
+	public void completeTask() {
+		completedAt = ZonedDateTime.now();
+	}
 	
+
 }

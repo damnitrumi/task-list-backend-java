@@ -1,6 +1,7 @@
 package com.guilhermesoares.tasklist.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -12,6 +13,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -20,26 +22,29 @@ public class User implements Serializable, UserDetails{
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
-	private String id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	private String login;
 	private String password;
 	
+	@OneToMany(mappedBy = "taskOwner")
+	private List<Task> tasks = new ArrayList<>();
+
 	public User() {
 	}
 
-	public User(String id, String login, String password) {
+	public User(Long id, String login, String password) {
 		super();
 		this.id = id;
 		this.login = login;
 		this.password = password;
 	}
 
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -57,6 +62,10 @@ public class User implements Serializable, UserDetails{
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	public List<Task> getTasks() {
+		return tasks;
 	}
 
 	@Override
