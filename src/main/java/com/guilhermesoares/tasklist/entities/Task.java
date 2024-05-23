@@ -90,7 +90,7 @@ public class Task implements Serializable {
 	}
 
 	public TaskStatus getTaskStatus() {
-		return TaskStatus.valueOf(taskStatus);
+		return TaskStatus.fromValue(taskStatus);
 	}
 
 	public void setTaskStatus(TaskStatus taskStatus) {
@@ -100,7 +100,7 @@ public class Task implements Serializable {
 	}
 
 	public TaskPriority getTaskPriority() {
-		return TaskPriority.valueOf(taskPriority);
+		return TaskPriority.fromValue(taskPriority);
 	}
 
 	public void setTaskPriority(TaskPriority taskPriority) {

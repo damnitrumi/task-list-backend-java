@@ -15,7 +15,7 @@ public enum TaskPriority {
 		return code;
 	}
 	
-	public static TaskPriority valueOf(int code) {
+	public static TaskPriority fromValue(int code) {
 		for(TaskPriority value : TaskPriority.values()) {
 			if(value.getCode() == code) {
 				return value;

@@ -19,15 +19,9 @@ public class AuthResource {
 	@Autowired
 	AuthenticationService authenticationService;
 	
-	@Autowired
-	private AuthenticationManager authenticationManager;
-	
 	@PostMapping
 	public ResponseEntity<String> login(@RequestBody UserAuthDTO data) {
-		var usernamePassword = new UsernamePasswordAuthenticationToken(data.username(), data.password());
-		var auth = this.authenticationManager.authenticate(usernamePassword);
-		
-		String token = authenticationService.authenticate(auth);
+		String token = authenticationService.authenticate(data.login(), data.password());
 		return ResponseEntity.ok().body(token);
 	}
 }

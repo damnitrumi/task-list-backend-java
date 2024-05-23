@@ -9,6 +9,9 @@ import java.util.Objects;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.guilhermesoares.tasklist.dto.UserRegisterDTO;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,6 +27,8 @@ public class User implements Serializable, UserDetails{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
+	@Column(unique = true, nullable = false)
 	private String login;
 	private String password;
 	
@@ -38,6 +43,11 @@ public class User implements Serializable, UserDetails{
 		this.id = id;
 		this.login = login;
 		this.password = password;
+	}
+	
+	public User(UserRegisterDTO userRegisterDTO) {
+		login = userRegisterDTO.login();
+		password = userRegisterDTO.password();
 	}
 
 	public Long getId() {

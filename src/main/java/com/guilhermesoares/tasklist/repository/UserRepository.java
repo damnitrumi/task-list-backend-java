@@ -8,4 +8,6 @@ import com.guilhermesoares.tasklist.entities.User;
 public interface UserRepository extends JpaRepository<User, Long>{
 	
 	UserDetails findByLogin(String login);
+	
+	boolean existsByLogin(String login);
 }
