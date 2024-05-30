@@ -13,32 +13,42 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.guilhermesoares.tasklist.dto.UserRegisteredDTO;
+import com.guilhermesoares.tasklist.dto.UserDTO;
 import com.guilhermesoares.tasklist.dto.UserRegisterDTO;
+import com.guilhermesoares.tasklist.dto.UserRegisteredDTO;
 import com.guilhermesoares.tasklist.entities.User;
 import com.guilhermesoares.tasklist.services.UserService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/users")
 public class UserResource {
-	
+
 	@Autowired
 	UserService userService;
 	
 	@GetMapping
-	public ResponseEntity<List<User>> findAll(){
+	public ResponseEntity<List<User>> findAll() {
 		User u1 = new User(1L, "UserOne", "12345");
 		List<User> list = new ArrayList<>();
 		list.add(u1);
 		return ResponseEntity.ok().body(list);
 	}
-	
+
 	@PostMapping("/register")
-	public ResponseEntity<UserRegisteredDTO> register(@RequestBody UserRegisterDTO userRegister){
+	public ResponseEntity<UserRegisteredDTO> register(@RequestBody UserRegisterDTO userRegister) {
 		User user = new User(userRegister);
 		User obj = userService.registerUser(user);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		UserRegisteredDTO userRegisteredDTO = UserRegisteredDTO.fromEntity(obj);
 		return ResponseEntity.created(uri).body(userRegisteredDTO);
+	}
+
+	@GetMapping("/profile")
+	public ResponseEntity<UserDTO> getCurrentUser(HttpServletRequest request){
+		User user = userService.recoverUserData(request);
+		UserDTO userDTO = UserDTO.fromEntity(user);
+		return ResponseEntity.ok().body(userDTO);
 	}
 }
