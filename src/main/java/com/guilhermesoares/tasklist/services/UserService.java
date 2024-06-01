@@ -15,7 +15,7 @@ import jakarta.transaction.Transactional;
 public class UserService {
 	
 	@Autowired
-	UserRepository repository;
+	UserRepository userRepository;
 	
 	@Autowired
 	PasswordEncoder passwordEncoder;
@@ -26,19 +26,19 @@ public class UserService {
 	//Insert
 	@Transactional
 	public User registerUser(User user) {
-		if(repository.existsByLogin(user.getLogin())) {
+		if(userRepository.existsByLogin(user.getLogin())) {
 			throw new IllegalArgumentException("Username already exists");
 		}
 		
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		
-		return repository.save(user);
+		return userRepository.save(user);
 	}
 	
 	//Recover User data through JWT
 	public User recoverUserData(HttpServletRequest request) {
 		String subject = jwtService.recoverTokenSubject(request);
-		UserDetails userDetails = repository.findByLogin(subject);
+		UserDetails userDetails = userRepository.findByLogin(subject);
 		User user = (User) userDetails;
 		return user;
 	}

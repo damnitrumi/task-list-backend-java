@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.guilhermesoares.tasklist.entities.enums.TaskPriority;
 import com.guilhermesoares.tasklist.entities.enums.TaskStatus;
 
@@ -30,6 +31,7 @@ public class Task implements Serializable {
 	private Integer taskStatus;
 	private Integer taskPriority;
 	
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User taskOwner;
