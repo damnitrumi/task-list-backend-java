@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.guilhermesoares.tasklist.dto.TaskRegisterDTO;
 import com.guilhermesoares.tasklist.entities.enums.TaskPriority;
 import com.guilhermesoares.tasklist.entities.enums.TaskStatus;
 
@@ -49,6 +50,15 @@ public class Task implements Serializable {
 		this.taskStatus = TaskStatus.PENDING.getCode();
 		this.taskPriority = taskPriority.getCode();
 		this.taskOwner = taskOwner;
+	}
+	
+	public Task(TaskRegisterDTO taskRegisterDTO) {
+		super();
+		name = taskRegisterDTO.name();
+		description = taskRegisterDTO.description();
+		createdAt = ZonedDateTime.now();
+		taskStatus = TaskStatus.PENDING.getCode();
+		taskPriority = TaskPriority.valueOf(taskRegisterDTO.taskPriority().toUpperCase()).getCode();
 	}
 
 	public Long getId() {

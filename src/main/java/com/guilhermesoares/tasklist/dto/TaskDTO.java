@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 import com.guilhermesoares.tasklist.entities.Task;
+import com.guilhermesoares.tasklist.entities.User;
 
 public record TaskDTO(Long id, String name, String description, ZonedDateTime createdAt, ZonedDateTime completedAt,
 		Integer taskStatus, Integer taskPriority) implements Serializable{

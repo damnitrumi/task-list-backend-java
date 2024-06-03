@@ -1,5 +1,7 @@
 package com.guilhermesoares.tasklist.services;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.guilhermesoares.tasklist.entities.User;
 import com.guilhermesoares.tasklist.repository.UserRepository;
+import com.guilhermesoares.tasklist.services.exceptions.ResourceNotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -41,5 +44,10 @@ public class UserService {
 		UserDetails userDetails = userRepository.findByLogin(subject);
 		User user = (User) userDetails;
 		return user;
+	}
+	
+	public User findUserById(Long id) {
+		Optional<User> obj = userRepository.findById(id);
+		return obj.orElseThrow(() -> new ResourceNotFoundException(id));
 	}
 }

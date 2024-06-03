@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.guilhermesoares.tasklist.dto.TaskDTO;
+import com.guilhermesoares.tasklist.dto.TaskRegisterDTO;
 import com.guilhermesoares.tasklist.entities.Task;
+import com.guilhermesoares.tasklist.entities.User;
 import com.guilhermesoares.tasklist.repository.TaskRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +19,9 @@ public class TaskService {
 
 	@Autowired
 	TaskRepository taskRepository;
+	
+	@Autowired
+	UserService userService;
 	
 	@Autowired
 	JwtService jwtService;
@@ -32,6 +37,17 @@ public class TaskService {
 		List<Task> tasks = taskRepository.findByTaskOwnerId(id);
 		List<TaskDTO> tasksDTO = toTaskDTO(tasks);
 		return tasksDTO;
+	}
+	
+	public TaskDTO insertTask(TaskRegisterDTO taskRegisterDTO, HttpServletRequest request) {
+		Long id = jwtService.recoverTokenId(request);
+		Task task = new Task(taskRegisterDTO);
+		
+		User user = userService.findUserById(id);
+		task.setTaskOwner(user);
+		taskRepository.save(task);
+		TaskDTO taskDTO = TaskDTO.fromEntity(task);
+		return taskDTO;
 	}
 	
 	public List<TaskDTO> toTaskDTO(List<Task> tasks){
