@@ -53,4 +53,11 @@ public class TaskResource {
 		TaskDTO taskDTO = TaskDTO.fromEntity(task);
 		return ResponseEntity.ok().body(taskDTO);
 	}
+
+	@PutMapping("complete/{id}")
+	public ResponseEntity<TaskDTO> completeTask(@PathVariable Long id, HttpServletRequest request) {
+		Task task = taskService.completeTask(id, request);
+		TaskDTO taskDTO = TaskDTO.fromEntity(task);
+		return ResponseEntity.ok().body(taskDTO);
+	}
 }

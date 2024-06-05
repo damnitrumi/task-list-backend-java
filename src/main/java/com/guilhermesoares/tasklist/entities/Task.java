@@ -152,6 +152,7 @@ public class Task implements Serializable {
 	
 	public void completeTask() {
 		completedAt = ZonedDateTime.now();
+		taskStatus = TaskStatus.COMPLETED.getCode();
 	}
 	
 
