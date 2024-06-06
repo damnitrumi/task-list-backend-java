@@ -40,17 +40,17 @@ public class TaskService {
 	JwtService jwtService;
 
 	public List<Task> findTasksByUserId(HttpServletRequest request) {
-		Long id = jwtService.recoverTokenId(request);
-		List<Task> tasks = taskRepository.findByTaskOwnerId(id);
+		Long userId = jwtService.recoverTokenId(request);
+		List<Task> tasks = taskRepository.findByTaskOwnerId(userId);
 
 		return tasks;
 	}
 
 	public Task insertTask(TaskRegisterDTO taskRegisterDTO, HttpServletRequest request) {
-		Long id = jwtService.recoverTokenId(request);
+		Long userId = jwtService.recoverTokenId(request);
 		Task task = new Task(taskRegisterDTO);
 
-		User user = userService.findUserById(id);
+		User user = userService.findUserById(userId);
 		task.setTaskOwner(user);
 		taskRepository.save(task);
 
@@ -59,10 +59,10 @@ public class TaskService {
 
 	public Task updateTask(Long taskId, TaskUpdateDTO taskUpdateDTO, HttpServletRequest request) {
 		Task task = null;
-		Long id = jwtService.recoverTokenId(request);
+		Long userId = jwtService.recoverTokenId(request);
 		
-		if(!userRepository.existsById(id)) {
-			throw new ResourceNotFoundException(id);
+		if(!userRepository.existsById(userId)) {
+			throw new ResourceNotFoundException(userId);
 		}
 
 		try {
@@ -71,7 +71,7 @@ public class TaskService {
 			throw new ResourceNotFoundException(taskId);
 		}
 
-		if (!id.equals(task.getTaskOwner().getId())) {
+		if (!userId.equals(task.getTaskOwner().getId())) {
 			throw new UnauthorizedException("User not authorized to update this task");
 		}
 
@@ -83,10 +83,10 @@ public class TaskService {
 	
 	public void deleteTask(Long taskId, HttpServletRequest request) {
 		Task task = null;
-		Long id = jwtService.recoverTokenId(request);
+		Long userId = jwtService.recoverTokenId(request);
 		
-		if(!userRepository.existsById(id)) {
-			throw new ResourceNotFoundException(id);
+		if(!userRepository.existsById(userId)) {
+			throw new ResourceNotFoundException(userId);
 		}
 		
 		try {
@@ -95,7 +95,7 @@ public class TaskService {
 			throw new ResourceNotFoundException(taskId);
 		}
 		
-		if(!id.equals(task.getTaskOwner().getId())) {
+		if(!userId.equals(task.getTaskOwner().getId())) {
 			throw new UnauthorizedException("User not authorized to delete this task");
 		}
 		
