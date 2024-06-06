@@ -145,15 +145,4 @@ public class Task implements Serializable {
 		Task other = (Task) obj;
 		return Objects.equals(id, other.id);
 	}
-	
-	public void uncompleteTask() {
-		completedAt = null;
-	}
-	
-	public void completeTask() {
-		completedAt = ZonedDateTime.now();
-		taskStatus = TaskStatus.COMPLETED.getCode();
-	}
-	
-
 }

@@ -1,5 +1,6 @@
 package com.guilhermesoares.tasklist.services;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,34 +82,6 @@ public class TaskService {
 		return task;
 	}
 
-	public Task completeTask(Long taskId, HttpServletRequest request) {
-		User user = null;
-		Task task = null;
-		Long id = jwtService.recoverTokenId(request);
-		
-		try {
-			user = userRepository.getReferenceById(id);
-		}catch(EntityNotFoundException e) {
-			throw new ResourceNotFoundException(id);
-		}
-		
-		
-		try {
-			task = taskRepository.getReferenceById(taskId);
-		}catch(EntityNotFoundException e) {
-			throw new ResourceNotFoundException(taskId);
-		}
-		
-		if(!user.getId().equals(task.getTaskOwner().getId())) {
-			throw new UnauthorizedException("User not authorized to update this task");
-		}
-		
-		task.completeTask();
-		taskRepository.save(task);
-		return task;
-		
-	}
-
 	public List<TaskDTO> toTaskDTO(List<Task> tasks) {
 		List<TaskDTO> tasksDTO = tasks.stream().map(TaskDTO::fromEntity).collect(Collectors.toList());
 		return tasksDTO;
@@ -117,6 +90,14 @@ public class TaskService {
 	public Task updateTaskOBJ(Task task, TaskUpdateDTO taskUpdateDTO) {
 		TaskStatus taskStatus = TaskStatus.valueOf(taskUpdateDTO.taskStatus().toUpperCase());
 		TaskPriority taskPriority = TaskPriority.valueOf(taskUpdateDTO.taskPriority().toUpperCase());
+		
+		if(taskStatus != TaskStatus.COMPLETED && task.getCompletedAt() != null) {
+			task.setCompletedAt(null);
+		}
+		
+		if(taskStatus == TaskStatus.COMPLETED) {
+			task.setCompletedAt(ZonedDateTime.now());
+		}
 
 		task.setName(taskUpdateDTO.name());
 		task.setDescription(taskUpdateDTO.description());
