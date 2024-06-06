@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.guilhermesoares.tasklist.dto.TaskDTO;
@@ -16,6 +17,7 @@ import com.guilhermesoares.tasklist.entities.enums.TaskPriority;
 import com.guilhermesoares.tasklist.entities.enums.TaskStatus;
 import com.guilhermesoares.tasklist.repository.TaskRepository;
 import com.guilhermesoares.tasklist.repository.UserRepository;
+import com.guilhermesoares.tasklist.services.exceptions.DatabaseException;
 import com.guilhermesoares.tasklist.services.exceptions.ResourceNotFoundException;
 import com.guilhermesoares.tasklist.services.exceptions.UnauthorizedException;
 
@@ -56,13 +58,10 @@ public class TaskService {
 	}
 
 	public Task updateTask(Long taskId, TaskUpdateDTO taskUpdateDTO, HttpServletRequest request) {
-		User user = null;
 		Task task = null;
 		Long id = jwtService.recoverTokenId(request);
-
-		try {
-			user = userRepository.getReferenceById(id);
-		} catch (EntityNotFoundException e) {
+		
+		if(!userRepository.existsById(id)) {
 			throw new ResourceNotFoundException(id);
 		}
 
@@ -72,7 +71,7 @@ public class TaskService {
 			throw new ResourceNotFoundException(taskId);
 		}
 
-		if (!user.getId().equals(task.getTaskOwner().getId())) {
+		if (!id.equals(task.getTaskOwner().getId())) {
 			throw new UnauthorizedException("User not authorized to update this task");
 		}
 
@@ -80,6 +79,31 @@ public class TaskService {
 		taskRepository.save(task);
 
 		return task;
+	}
+	
+	public void deleteTask(Long taskId, HttpServletRequest request) {
+		Task task = null;
+		Long id = jwtService.recoverTokenId(request);
+		
+		if(!userRepository.existsById(id)) {
+			throw new ResourceNotFoundException(id);
+		}
+		
+		try {
+			task = taskRepository.getReferenceById(taskId);
+		}catch(EntityNotFoundException e) {
+			throw new ResourceNotFoundException(taskId);
+		}
+		
+		if(!id.equals(task.getTaskOwner().getId())) {
+			throw new UnauthorizedException("User not authorized to delete this task");
+		}
+		
+		try {
+			taskRepository.deleteById(taskId);
+		}catch(DataIntegrityViolationException e) {
+			throw new DatabaseException(e.getMessage());
+		}
 	}
 
 	public List<TaskDTO> toTaskDTO(List<Task> tasks) {
