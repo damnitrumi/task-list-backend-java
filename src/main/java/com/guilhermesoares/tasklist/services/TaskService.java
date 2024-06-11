@@ -21,7 +21,6 @@ import com.guilhermesoares.tasklist.services.exceptions.DatabaseException;
 import com.guilhermesoares.tasklist.services.exceptions.ResourceNotFoundException;
 import com.guilhermesoares.tasklist.services.exceptions.UnauthorizedException;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
@@ -58,50 +57,36 @@ public class TaskService {
 	}
 
 	public Task updateTask(Long taskId, TaskUpdateDTO taskUpdateDTO, HttpServletRequest request) {
-		Task task = null;
 		Long userId = jwtService.recoverTokenId(request);
-		
-		if(!userRepository.existsById(userId)) {
+
+		if (!userRepository.existsById(userId)) {
 			throw new ResourceNotFoundException(userId);
 		}
 
-		try {
-			task = taskRepository.getReferenceById(taskId);
-		} catch (EntityNotFoundException e) {
-			throw new ResourceNotFoundException(taskId);
-		}
+		Task task = findTaskOrThrow(taskId);
 
-		if (!userId.equals(task.getTaskOwner().getId())) {
-			throw new UnauthorizedException("User not authorized to update this task");
-		}
+		checkUserPermission(userId, task, "User not authorized to update this task");
 
 		task = updateTaskOBJ(task, taskUpdateDTO);
 		taskRepository.save(task);
 
 		return task;
 	}
-	
+
 	public void deleteTask(Long taskId, HttpServletRequest request) {
-		Task task = null;
 		Long userId = jwtService.recoverTokenId(request);
-		
-		if(!userRepository.existsById(userId)) {
+
+		if (!userRepository.existsById(userId)) {
 			throw new ResourceNotFoundException(userId);
 		}
-		
-		try {
-			task = taskRepository.getReferenceById(taskId);
-		}catch(EntityNotFoundException e) {
-			throw new ResourceNotFoundException(taskId);
-		}
-		
-		if(!userId.equals(task.getTaskOwner().getId())) {
-			throw new UnauthorizedException("User not authorized to delete this task");
-		}
-		
+
+		Task task = findTaskOrThrow(taskId);
+
+		checkUserPermission(userId, task, "User not authorized to delete this task");
+
 		try {
 			taskRepository.deleteById(taskId);
-		}catch(DataIntegrityViolationException e) {
+		} catch (DataIntegrityViolationException e) {
 			throw new DatabaseException(e.getMessage());
 		}
 	}
@@ -114,12 +99,12 @@ public class TaskService {
 	public Task updateTaskOBJ(Task task, TaskUpdateDTO taskUpdateDTO) {
 		TaskStatus taskStatus = TaskStatus.valueOf(taskUpdateDTO.taskStatus().toUpperCase());
 		TaskPriority taskPriority = TaskPriority.valueOf(taskUpdateDTO.taskPriority().toUpperCase());
-		
-		if(taskStatus != TaskStatus.COMPLETED && task.getCompletedAt() != null) {
+
+		if (taskStatus != TaskStatus.COMPLETED && task.getCompletedAt() != null) {
 			task.setCompletedAt(null);
 		}
-		
-		if(taskStatus == TaskStatus.COMPLETED) {
+
+		if (taskStatus == TaskStatus.COMPLETED) {
 			task.setCompletedAt(ZonedDateTime.now());
 		}
 
@@ -129,6 +114,16 @@ public class TaskService {
 		task.setTaskPriority(taskPriority);
 
 		return task;
+	}
+
+	public Task findTaskOrThrow(Long taskId) {
+		return taskRepository.findById(taskId).orElseThrow(()-> new ResourceNotFoundException(taskId));
+	}
+
+	public void checkUserPermission(Long userId, Task task, String msg) {
+		if (!userId.equals(task.getTaskOwner().getId())) {
+			throw new UnauthorizedException(msg);
+		}
 	}
 
 }
