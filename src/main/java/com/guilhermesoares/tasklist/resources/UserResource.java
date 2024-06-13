@@ -22,6 +22,7 @@ import com.guilhermesoares.tasklist.entities.enums.TaskPriority;
 import com.guilhermesoares.tasklist.services.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
@@ -42,7 +43,7 @@ public class UserResource {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<UserRegisteredDTO> register(@RequestBody UserRegisterDTO userRegister) {
+	public ResponseEntity<UserRegisteredDTO> register(@Valid @RequestBody UserRegisterDTO userRegister) {
 		User user = new User(userRegister);
 		User obj = userService.registerUser(user);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();

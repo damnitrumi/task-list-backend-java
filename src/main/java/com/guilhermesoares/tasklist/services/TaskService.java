@@ -21,6 +21,7 @@ import com.guilhermesoares.tasklist.services.exceptions.DatabaseException;
 import com.guilhermesoares.tasklist.services.exceptions.ResourceNotFoundException;
 import com.guilhermesoares.tasklist.services.exceptions.UnauthorizedException;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
@@ -68,6 +69,7 @@ public class TaskService {
 		checkUserPermission(userId, task, "User not authorized to update this task");
 
 		task = updateTaskOBJ(task, taskUpdateDTO);
+
 		taskRepository.save(task);
 
 		return task;
@@ -114,10 +116,11 @@ public class TaskService {
 		task.setTaskPriority(taskPriority);
 
 		return task;
+
 	}
 
 	public Task findTaskOrThrow(Long taskId) {
-		return taskRepository.findById(taskId).orElseThrow(()-> new ResourceNotFoundException(taskId));
+		return taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException(taskId));
 	}
 
 	public void checkUserPermission(Long userId, Task task, String msg) {

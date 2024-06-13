@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.guilhermesoares.tasklist.dto.UserAuthDTO;
 import com.guilhermesoares.tasklist.services.AuthenticationService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/login")
 public class AuthResource {
@@ -18,7 +20,7 @@ public class AuthResource {
 	AuthenticationService authenticationService;
 	
 	@PostMapping
-	public ResponseEntity<String> login(@RequestBody UserAuthDTO data) {
+	public ResponseEntity<String> login(@Valid @RequestBody UserAuthDTO data) {
 		String token = authenticationService.authenticate(data.login(), data.password());
 		return ResponseEntity.ok().body(token);
 	}

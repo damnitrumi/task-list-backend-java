@@ -22,6 +22,7 @@ import com.guilhermesoares.tasklist.entities.Task;
 import com.guilhermesoares.tasklist.services.TaskService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/tasks")
@@ -38,7 +39,7 @@ public class TaskResource {
 	}
 
 	@PostMapping
-	public ResponseEntity<TaskDTO> insertTask(@RequestBody TaskRegisterDTO taskRegisterDTO,
+	public ResponseEntity<TaskDTO> insertTask(@Valid @RequestBody TaskRegisterDTO taskRegisterDTO,
 			HttpServletRequest request) {
 		Task task = taskService.insertTask(taskRegisterDTO, request);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(task.getId())
@@ -48,7 +49,7 @@ public class TaskResource {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TaskUpdateDTO taskUpdateDTO,
+	public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @Valid @RequestBody TaskUpdateDTO taskUpdateDTO,
 			HttpServletRequest request) {
 		Task task = taskService.updateTask(id, taskUpdateDTO, request);
 		TaskDTO taskDTO = TaskDTO.fromEntity(task);
