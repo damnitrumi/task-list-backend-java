@@ -21,7 +21,6 @@ import com.guilhermesoares.tasklist.services.exceptions.DatabaseException;
 import com.guilhermesoares.tasklist.services.exceptions.ResourceNotFoundException;
 import com.guilhermesoares.tasklist.services.exceptions.UnauthorizedException;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
