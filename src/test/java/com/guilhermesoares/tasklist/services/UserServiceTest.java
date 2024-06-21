@@ -1,7 +1,5 @@
 package com.guilhermesoares.tasklist.services;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -44,7 +41,7 @@ public class UserServiceTest {
 	
 	@Test
 	@DisplayName("should register a new User")
-	void userServiceCase1() {
+	void insertNewUser() {
 		User user = new User(1L, "Username", "Password");
 		userService.registerUser(user);
 		verify(userRepository, times(1)).save(user);
@@ -52,7 +49,7 @@ public class UserServiceTest {
 	
 	@Test
 	@DisplayName("should not register a new User when the login already exists")
-	void userServiceCase2() {
+	void failToInsertANewUser() {
 		User user = new User(1L, "Username", "Password");
 		when(userRepository.existsByLogin(user.getLogin())).thenReturn(true);
 		
@@ -66,7 +63,7 @@ public class UserServiceTest {
 	
 	@Test
 	@DisplayName("should recover User data when the login is successful")
-	void userServiceCase3() {
+	void getUserDataWhenLoggedIn() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		when(jwtService.recoverTokenSubject(request)).thenReturn("username");
 		
@@ -76,7 +73,7 @@ public class UserServiceTest {
 	
 	@Test
 	@DisplayName("should return User data when id is passed as parameter")
-	void userServiceCase4() {
+	void getUserDataWithId() {
 		User user = new User(1L, "Username", "Password");
 		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 		
@@ -88,7 +85,7 @@ public class UserServiceTest {
 	
 	@Test
 	@DisplayName("should return an error when id is invalid/When user is not found")
-	void userServiceCase5() {
+	void failToGetUserDataWithId() {
 		
 		ResourceNotFoundException thrown = Assertions.assertThrows(ResourceNotFoundException.class, ()->{
 			userService.findUserById(2L);
