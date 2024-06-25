@@ -1,6 +1,7 @@
 package com.guilhermesoares.tasklist.services;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import com.guilhermesoares.tasklist.dto.TaskRegisterDTO;
@@ -26,6 +28,7 @@ import com.guilhermesoares.tasklist.entities.enums.TaskPriority;
 import com.guilhermesoares.tasklist.entities.enums.TaskStatus;
 import com.guilhermesoares.tasklist.repository.TaskRepository;
 import com.guilhermesoares.tasklist.repository.UserRepository;
+import com.guilhermesoares.tasklist.services.exceptions.DatabaseException;
 import com.guilhermesoares.tasklist.services.exceptions.ResourceNotFoundException;
 import com.guilhermesoares.tasklist.services.exceptions.UnauthorizedException;
 
@@ -178,5 +181,54 @@ public class TaskServiceTest {
 		});
 		
 		Assertions.assertEquals("User not authorized to update this task", thrown.getMessage());
+	}
+	
+	@Test
+	@DisplayName("it should delete a task succesfully")
+	void deleteTask() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		Long userId = 1L;
+		Long taskId = 2L;
+		
+		when(jwtService.recoverTokenId(request)).thenReturn(userId);
+		when(userRepository.existsById(userId)).thenReturn(true);
+		
+		User user = new User(userId, "Username", "Password");
+		Task task = new Task(taskId, "Task Name", "Task Desc", TaskPriority.HIGH, user);
+		
+		when(taskRepository.findById(task.getId())).thenReturn(Optional.of(task));
+		
+		taskService.deleteTask(task.getId(), request);
+		
+		verify(taskRepository, times(1)).deleteById(task.getId());
+	}
+	
+	//As i already tested in the 'update' tests the methods that throw an exception in cases like when the id of the user does not match an user
+	//Or the id of the task does not return a task
+	//Or if the TaskOwnerId does not match the user id, i will not be testing these situations again.
+	
+	@Test
+	@DisplayName("it should throw DatabaseException when there is a data integrity violation")
+	void deleteTaskCase2() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		Long userId = 1L;
+		Long taskId = 2L;
+		
+		when(jwtService.recoverTokenId(request)).thenReturn(userId);
+		when(userRepository.existsById(userId)).thenReturn(true);
+		
+		User user = new User(userId, "Username", "Password");
+		Task task = new Task(taskId, "Task Name", "Task Desc", TaskPriority.HIGH, user);
+		
+		when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
+		
+		doThrow(new DataIntegrityViolationException("Integrity Constraint Violation")).when(taskRepository).deleteById(task.getId());;
+		
+		DatabaseException thrown = Assertions.assertThrows(DatabaseException.class, ()->{
+			taskService.deleteTask(task.getId(), request);
+		});
+		
+		Assertions.assertEquals("Integrity Constraint Violation", thrown.getMessage());
+		
 	}
 }

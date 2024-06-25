@@ -92,6 +92,7 @@ public class TaskService {
 		}
 	}
 
+	//This method below could be moved to an util class, but i'll leave it here to not overhead/add complexity
 	public List<TaskDTO> toTaskDTO(List<Task> tasks) {
 		List<TaskDTO> tasksDTO = tasks.stream().map(TaskDTO::fromEntity).collect(Collectors.toList());
 		return tasksDTO;
