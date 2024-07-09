@@ -4,9 +4,12 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.empty;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,7 +30,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guilhermesoares.tasklist.dto.TaskDTO;
 import com.guilhermesoares.tasklist.dto.TaskRegisterDTO;
+import com.guilhermesoares.tasklist.dto.TaskUpdateDTO;
 import com.guilhermesoares.tasklist.entities.Task;
+import com.guilhermesoares.tasklist.entities.enums.TaskPriority;
 import com.guilhermesoares.tasklist.services.TaskService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -90,5 +95,40 @@ public class TaskResourceTest {
 		.andExpect(jsonPath("$.completedAt").value(nullValue()))
 		.andExpect(jsonPath("$.taskStatus").value(task.getTaskStatus().toString()))
 		.andExpect(jsonPath("$.taskPriority").value(task.getTaskPriority().toString()));
+	}
+	
+	@Test
+	@DisplayName("it should update a task")
+	void updateTask() throws Exception{
+		Long taskId = 1L;
+		TaskUpdateDTO taskUpdateDTO = new TaskUpdateDTO(taskId, "Updated Task Name", "Updated Task Description", "PENDING", "HIGH");
+		Task task = new Task(taskId, taskUpdateDTO.name(), taskUpdateDTO.description(), TaskPriority.HIGH, null);
+		when(taskService.updateTask(eq(taskId), eq(taskUpdateDTO), any(HttpServletRequest.class))).thenReturn(task);
+		
+		mockMvc.perform(put("/tasks/{id}", taskId)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(taskUpdateDTO))
+				.header("Authorization", "Bearer testtoken"))
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.id").value(taskId))
+		.andExpect(jsonPath("$.name").value(task.getName()))
+		.andExpect(jsonPath("$.description").value(task.getDescription()))
+		.andExpect(jsonPath("$.createdAt").exists())
+		.andExpect(jsonPath("$.completedAt").value(nullValue()))
+		.andExpect(jsonPath("$.taskStatus").value(task.getTaskStatus().toString()))
+		.andExpect(jsonPath("$.taskPriority").value(task.getTaskPriority().toString()));
+	}
+	
+	@Test
+	@DisplayName("it should delete a task")
+	void deleteTask() throws Exception{
+		Long taskId = 1L;
+		
+		doNothing().when(taskService).deleteTask(eq(taskId), any(HttpServletRequest.class));
+		
+		mockMvc.perform(delete("/tasks/{id}", taskId)
+				.contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer testtoken"))
+		.andExpect(status().isNoContent());
 	}
 }
