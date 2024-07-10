@@ -12,7 +12,6 @@ import com.guilhermesoares.tasklist.repository.UserRepository;
 import com.guilhermesoares.tasklist.services.exceptions.ResourceNotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -27,7 +26,6 @@ public class UserService {
 	JwtService jwtService;
 	
 	//Insert
-	@Transactional
 	public User registerUser(User user) {
 		if(userRepository.existsByLogin(user.getLogin())) {
 			throw new IllegalArgumentException("Username already exists");
